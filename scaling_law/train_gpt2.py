@@ -69,7 +69,7 @@ def heuristic_filter(example):
 """Part 4 Tokenize"""
 
 
-def tokenize_func(dataset, tokenizer, token_max=100_000_000, heuristic=True):
+def tokenize_func(dataset, tokenizer, token_max=1_000_000, heuristic=False):
     """Tokenizer function for streamed dataset"""
     current_token_count = 0
     for example in dataset:
@@ -118,6 +118,7 @@ training_args = TrainingArguments(
     local_rank=local_rank,
     dataloader_num_workers=6,
     learning_rate=1e-4,
+    logging_steps=total_samples // (16 * 2 * 4),
     logging_dir="./logs",
     remove_unused_columns=False,
 )
