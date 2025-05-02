@@ -63,13 +63,13 @@ def compute_perplexity(text):
 def heuristic_filter(example):
     perplexity = compute_perplexity(example["text"])
     # perplexities.append(perplexity)
-    return 50 < perplexity <= 100  # Adjust thresholds based on your needs
+    return 25 < perplexity <= 55  # Adjust thresholds based on your needs
 
 
 """Part 4 Tokenize"""
 
 
-def tokenize_func(dataset, tokenizer, token_max=1_000_000, heuristic=False):
+def tokenize_func(dataset, tokenizer, token_max=100_000, heuristic=True):
     """Tokenizer function for streamed dataset"""
     current_token_count = 0
     for example in dataset:
