@@ -17,7 +17,7 @@ from transformers import DataCollatorForLanguageModeling
 print(torch.cuda.device_count())
 
 # Load any model from checkpoint
-checkpoint = "./gpt2-finetuned/perplexity-1e8"
+checkpoint = "./gpt2-finetuned/random-1e8"
 
 model = AutoModelForCausalLM.from_pretrained(checkpoint)
 tokenizer_checkpoint = AutoTokenizer.from_pretrained(checkpoint)
@@ -82,14 +82,14 @@ def heuristic_filter(example):
     return 50 < perplexity <= 100  # Adjust thresholds based on your needs
 
 
-def tokenize_func(dataset, tokenizer, token_max=1_000_000, heuristic=False):
+def tokenize_func(dataset, tokenizer, token_max=100_000, heuristic=True):
     """Tokenizer function for streamed dataset"""
     current_token_count = 0
     for example in dataset:
         if heuristic:
             if not heuristic_filter(example):
                 continue
-        print(example)
+        # print(example)
         tokenized = tokenizer(
             example["text"], truncation=True, padding="max_length", max_length=512
         )
