@@ -60,38 +60,98 @@ def compute_perplexity(text):
 
 
 # Define heuristic filter: Keep texts with moderate perplexity
-def heuristic_filter(example):
+def heuristic_filter(example, low_perp_full, med_perp_full, high_perp_full):
     perplexity = compute_perplexity(example["text"])
     # perplexities.append(perplexity)
-    return 25 < perplexity <= 55  # Adjust thresholds based on your needs
+    if perplexity < 50 and not low_perp_full:
+        return "low"
+    elif 50 <= perplexity < 100 and not med_perp_full:
+        return "medium"
+    elif perplexity >= 100 and not high_perp_full:
+        return "high"
+    else:
+        return None
+
+
+# def compute_perplexity(text):
+#     """Compute perplexity of a given text using GPT-2."""
+#     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(
+#         device
+#     )
+#     with torch.no_grad():  # Disable gradient computation for efficiency
+#         loss = model(**inputs, labels=inputs["input_ids"]).loss
+#     return torch.exp(loss).item()  # Convert loss to perplexity
+
+
+# # Define heuristic filter: Keep texts with moderate perplexity
+# def heuristic_filter(example):
+#     perplexity = compute_perplexity(example["text"])
+#     # perplexities.append(perplexity)
+#     return 25 < perplexity <= 55  # Adjust thresholds based on your needs
 
 
 """Part 4 Tokenize"""
 
 
-def tokenize_func(dataset, tokenizer, token_max=100_000, heuristic=True):
+def tokenize_train(dataset, tokenizer, token_max=1_000_000, heuristic=False):
     """Tokenizer function for streamed dataset"""
+    count_dict = {"low": 0, "medium": 0, "high": 0}
     current_token_count = 0
+    target_perp = None
     for example in dataset:
+        # if lb == 0 and ub == 50 and current_token_count > 0.1 * token_max:
+        #     lb = 50
+        #     ub = 100
+        # elif lb == 50 and ub == 100 and current_token_count > 0.9 * token_max:
+        #     lb = 100
+        #     ub = 1000
         if heuristic:
-            if not heuristic_filter(example):
+            target_perp = heuristic_filter(
+                example,
+                count_dict["low"] > 0.1 * token_max,
+                count_dict["medium"] > 0.7 * token_max,
+                count_dict["high"] > 0.2 * token_max,
+            )
+            if not target_perp:
                 continue
+
         # print(example)
         tokenized = tokenizer(
             example["text"], truncation=True, padding="max_length", max_length=512
         )
         input_ids = tokenized["input_ids"]
         tokenized["labels"] = tokenized["input_ids"].copy()
-
+        if target_perp:
+            count_dict[target_perp] += len(input_ids)
         current_token_count += len(input_ids)
         if current_token_count >= token_max:
             break
         yield tokenized
 
 
+# def tokenize_func(dataset, tokenizer, token_max=100_000, heuristic=True):
+#     """Tokenizer function for streamed dataset"""
+#     current_token_count = 0
+#     for example in dataset:
+#         if heuristic:
+#             if not heuristic_filter(example):
+#                 continue
+#         # print(example)
+#         tokenized = tokenizer(
+#             example["text"], truncation=True, padding="max_length", max_length=512
+#         )
+#         input_ids = tokenized["input_ids"]
+#         tokenized["labels"] = tokenized["input_ids"].copy()
+
+#         current_token_count += len(input_ids)
+#         if current_token_count >= token_max:
+#             break
+#         yield tokenized
+
+
 # tokenized_dataset = small_dataset.map(tokenize_func, batched=True).with_format("torch")
 small_dataset = Dataset.from_generator(
-    lambda: tokenize_func(randomized_dataset, tokenizer)
+    lambda: tokenize_train(randomized_dataset, tokenizer)
 )
 
 print(small_dataset)
