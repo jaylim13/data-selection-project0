@@ -17,7 +17,7 @@ from transformers import DataCollatorForLanguageModeling
 print(torch.cuda.device_count())
 
 # Load any model from checkpoint
-checkpoint = "./gpt2-final-model/random-1e8"
+checkpoint = "./gpt2-finetuned/checkpoint-15"
 
 model = AutoModelForCausalLM.from_pretrained(checkpoint)
 tokenizer_checkpoint = AutoTokenizer.from_pretrained(checkpoint)

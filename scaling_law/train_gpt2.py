@@ -108,9 +108,9 @@ def tokenize_train(dataset, tokenizer, token_max=1_000_000, heuristic=False):
         if heuristic:
             target_perp = heuristic_filter(
                 example,
-                count_dict["low"] > 0.1 * token_max,
-                count_dict["medium"] > 0.7 * token_max,
-                count_dict["high"] > 0.2 * token_max,
+                count_dict["low"] > 0.05 * token_max,
+                count_dict["medium"] > 0.95 * token_max,
+                count_dict["high"] > 0.05 * token_max,
             )
             if not target_perp:
                 continue
@@ -128,6 +128,19 @@ def tokenize_train(dataset, tokenizer, token_max=1_000_000, heuristic=False):
             break
         yield tokenized
 
+
+train_dataset = Dataset.from_generator(
+    lambda: tokenize_train(randomized_dataset, tokenizer)
+)
+train_dataset = train_dataset.with_format("torch")
+
+print(train_dataset)
+total_samples = len(train_dataset)
+print(total_samples)
+
+model.resize_token_embeddings(len(tokenizer))
+data_collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
+# train_dataset = train_dataset.shuffle(seed=42)
 
 # def tokenize_func(dataset, tokenizer, token_max=100_000, heuristic=True):
 #     """Tokenizer function for streamed dataset"""
@@ -150,16 +163,16 @@ def tokenize_train(dataset, tokenizer, token_max=1_000_000, heuristic=False):
 
 
 # tokenized_dataset = small_dataset.map(tokenize_func, batched=True).with_format("torch")
-small_dataset = Dataset.from_generator(
-    lambda: tokenize_train(randomized_dataset, tokenizer)
-)
+# small_dataset = Dataset.from_generator(
+#     lambda: tokenize_train(randomized_dataset, tokenizer)
+# )
 
-print(small_dataset)
-total_samples = len(small_dataset)
-print(total_samples)
+# print(small_dataset)
+# total_samples = len(small_dataset)
+# print(total_samples)
 
-model.resize_token_embeddings(len(tokenizer))
-data_collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
+# model.resize_token_embeddings(len(tokenizer))
+# data_collator = DataCollatorWithPadding(tokenizer=tokenizer, padding=True)
 
 """Part 5 Train GPT2"""
 
@@ -187,7 +200,7 @@ training_args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=small_dataset,
+    train_dataset=train_dataset,
     data_collator=data_collator,
 )
 
