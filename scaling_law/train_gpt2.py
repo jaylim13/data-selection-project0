@@ -99,7 +99,7 @@ def heuristic_filter(example, low_perp_full, med_perp_full, high_perp_full):
 """Part 4 Tokenize"""
 
 
-def tokenize_train(dataset, tokenizer, token_max=100_000_000, heuristic=True):
+def tokenize_train(dataset, tokenizer, token_max=100_000, heuristic=True):
     """Tokenizer function for streamed dataset"""
     count_dict = {"low": 0, "medium": 0, "high": 0}
     current_token_count = 0

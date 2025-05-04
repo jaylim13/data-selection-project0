@@ -21,7 +21,7 @@ import numpy as np
 print(torch.cuda.device_count())
 
 # Load any model from checkpoint
-checkpoint = "./gpt2-finetuned/pruned-outliers/checkpoint-1526"
+checkpoint = "./gpt2-finetuned/random-1e8"
 
 model = AutoModelForCausalLM.from_pretrained(checkpoint)
 tokenizer_checkpoint = AutoTokenizer.from_pretrained(checkpoint)
@@ -79,22 +79,22 @@ def compute_perplexity(text):
     return torch.exp(loss).item()  # Convert loss to perplexity
 
 
-# # Define heuristic filter: Keep texts with moderate perplexity
-# def heuristic_filter(example):
-#     perplexity = compute_perplexity(example["text"])
-#     # perplexities.append(perplexity)
-#     return 50 < perplexity <= 100  # Adjust thresholds based on your needs
+# Define heuristic filter: Keep texts with moderate perplexity
+def heuristic_filter(example):
+    perplexity = compute_perplexity(example["text"])
+    # perplexities.append(perplexity)
+    return 50 < perplexity <= 100  # Adjust thresholds based on your needs
 
 
 # perplexities = []
 
 
-# def tokenize_func(dataset, tokenizer, token_max=1_000_000, heuristic=False):
+# def tokenize_func(dataset, tokenizer, token_max=1_000_000, heuristic=True):
 #     """Tokenizer function for streamed dataset"""
 #     current_token_count = 0
 #     for example in dataset:
 #         # print(compute_perplexity(example["text"]))
-#         perplexities.append(compute_perplexity(example["text"]))
+#         # perplexities.append(compute_perplexity(example["text"]))
 #         if heuristic:
 #             if not heuristic_filter(example):
 #                 continue
@@ -114,8 +114,8 @@ def compute_perplexity(text):
 # test_dataset = Dataset.from_generator(lambda: tokenize_func(test_dataset, tokenizer))
 # test_dataset = test_dataset.with_format("torch")
 
-# test_dataset.save_to_disk("test_dataset")
-test_dataset = Dataset.load_from_disk("test_dataset")
+# test_dataset.save_to_disk("test_dataset-perplexity-limited")
+test_dataset = Dataset.load_from_disk("test_dataset-perplexity-limited")
 
 """Plotting the perplexities of the test set"""
 
