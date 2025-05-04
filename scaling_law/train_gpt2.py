@@ -10,6 +10,10 @@ from transformers import (
 from datasets import load_dataset, Dataset
 import os
 
+import matplotlib.pyplot as plt
+import statistics
+import numpy as np
+
 os.environ["HF_HUB_READ_TIMEOUT"] = "60"
 os.environ["HF_HUB_CONNECT_TIMEOUT"] = "60"
 
@@ -19,6 +23,7 @@ model_name = "gpt2"
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token = tokenizer.eos_token
 model = AutoModelForCausalLM.from_pretrained(model_name)
+perplexities = []
 
 # Initialize the distributed process group for multi-GPU
 torch.distributed.init_process_group(backend="nccl")
@@ -62,12 +67,13 @@ def compute_perplexity(text):
 # Define heuristic filter: Keep texts with moderate perplexity
 def heuristic_filter(example, low_perp_full, med_perp_full, high_perp_full):
     perplexity = compute_perplexity(example["text"])
+    perplexities.append(perplexity)
     # perplexities.append(perplexity)
-    if perplexity < 50 and not low_perp_full:
+    if perplexity < 22 and not low_perp_full:
         return "low"
-    elif 50 <= perplexity < 100 and not med_perp_full:
+    elif 22 <= perplexity < 55 and not med_perp_full:
         return "medium"
-    elif perplexity >= 100 and not high_perp_full:
+    elif 55 <= perplexity <= 400 and not high_perp_full:
         return "high"
     else:
         return None
@@ -93,12 +99,13 @@ def heuristic_filter(example, low_perp_full, med_perp_full, high_perp_full):
 """Part 4 Tokenize"""
 
 
-def tokenize_train(dataset, tokenizer, token_max=1_000_000, heuristic=False):
+def tokenize_train(dataset, tokenizer, token_max=100_000_000, heuristic=True):
     """Tokenizer function for streamed dataset"""
     count_dict = {"low": 0, "medium": 0, "high": 0}
     current_token_count = 0
     target_perp = None
     for example in dataset:
+        perplexities.append(compute_perplexity(example["text"]))
         # if lb == 0 and ub == 50 and current_token_count > 0.1 * token_max:
         #     lb = 50
         #     ub = 100
@@ -109,8 +116,8 @@ def tokenize_train(dataset, tokenizer, token_max=1_000_000, heuristic=False):
             target_perp = heuristic_filter(
                 example,
                 count_dict["low"] > 0.05 * token_max,
-                count_dict["medium"] > 0.95 * token_max,
-                count_dict["high"] > 0.05 * token_max,
+                count_dict["medium"] > 0.8 * token_max,
+                count_dict["high"] > 0.15 * token_max,
             )
             if not target_perp:
                 continue
@@ -180,7 +187,7 @@ os.environ["WANDB_DISABLED"] = "true"
 
 # Define training arguments
 training_args = TrainingArguments(
-    output_dir="./gpt2-finetuned",
+    output_dir="./gpt2-finetuned/pruned-outliers",
     run_name="project0",
     eval_strategy="no",
     save_strategy="epoch",
@@ -205,3 +212,9 @@ trainer = Trainer(
 )
 
 trainer.train()
+
+# print("Sample size: " + str(len(perplexities)))
+# print("mean: " + str(statistics.mean(perplexities)))
+# print("lower quartile: " + str(np.percentile(perplexities, 25)))
+# print("median: " + str(statistics.median(perplexities)))
+# print("upper quartile: " + str(np.percentile(perplexities, 75)))
