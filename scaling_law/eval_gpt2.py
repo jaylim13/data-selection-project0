@@ -21,8 +21,9 @@ import numpy as np
 print(torch.cuda.device_count())
 
 # Load any model from checkpoint
-checkpoint = "./gpt2-finetuned/random-1e8"
+checkpoint = "./gpt2-finetuned/pruned-outliers/checkpoint-1526"
 
+base_model = AutoModelForCausalLM.from_pretrained("gpt2")
 model = AutoModelForCausalLM.from_pretrained(checkpoint)
 tokenizer_checkpoint = AutoTokenizer.from_pretrained(checkpoint)
 # torch.distributed.init_process_group(backend="nccl")
@@ -31,6 +32,8 @@ tokenizer_checkpoint = AutoTokenizer.from_pretrained(checkpoint)
 device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
 print(device)
+base_model.to(device)
+base_model.eval()
 model.to(device)
 model.eval()
 
@@ -69,7 +72,7 @@ if tokenizer.pad_token is None:
 model.resize_token_embeddings(len(tokenizer))
 
 
-def compute_perplexity(text):
+def compute_perplexity(text, model=base_model, tokenizer=tokenizer):
     """Compute perplexity of a given text using GPT-2."""
     inputs = tokenizer(text, return_tensors="pt", truncation=True, max_length=512).to(
         device
