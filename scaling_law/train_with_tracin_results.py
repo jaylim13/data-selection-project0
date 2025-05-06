@@ -1,3 +1,5 @@
+"""Filters the dataset using the influence scores to get even smaller subsets"""
+
 import torch
 from torch.utils.data import DataLoader
 import tqdm
@@ -60,7 +62,7 @@ print(torch.cuda.device_count())
 """Part 4 Tokenize"""
 
 
-def tokenize_train(tokenizer, token_max=50_000):
+def tokenize_train(tokenizer, token_max=80_000):
     """Tokenizer function for streamed dataset"""
     top_k = []
     current_token_count = 0
@@ -94,12 +96,12 @@ os.environ["WANDB_DISABLED"] = "true"
 
 # Define training arguments
 training_args = TrainingArguments(
-    output_dir="./gpt2-finetuned/pruned-outliers",
+    output_dir="./gpt2-finetuned/tracin-filtered",
     run_name="project0",
     eval_strategy="no",
     save_strategy="epoch",
-    per_device_train_batch_size=16,
-    gradient_accumulation_steps=2,
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=1,
     num_train_epochs=1,
     fp16=True,
     local_rank=local_rank,

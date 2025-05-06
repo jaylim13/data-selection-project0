@@ -1,3 +1,5 @@
+"""Evaluates the model on a given test set"""
+
 import torch
 from transformers import (
     AutoModelForCausalLM,
@@ -21,7 +23,7 @@ import numpy as np
 print(torch.cuda.device_count())
 
 # Load any model from checkpoint
-checkpoint = "./gpt2-finetuned/pruned-outliers/checkpoint-1526"
+checkpoint = "./gpt2-finetuned/tracin-filtered/checkpoint-156"
 
 base_model = AutoModelForCausalLM.from_pretrained("gpt2")
 model = AutoModelForCausalLM.from_pretrained(checkpoint)
@@ -118,7 +120,7 @@ def heuristic_filter(example):
 # test_dataset = test_dataset.with_format("torch")
 
 # test_dataset.save_to_disk("test_dataset-perplexity-limited")
-test_dataset = Dataset.load_from_disk("test_dataset-perplexity-limited")
+test_dataset = Dataset.load_from_disk("datasets/test_dataset")
 
 """Plotting the perplexities of the test set"""
 

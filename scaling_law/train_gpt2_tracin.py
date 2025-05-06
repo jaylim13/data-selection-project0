@@ -1,3 +1,5 @@
+"""Train model on random data, but extracts the gradients during training to later compute influence scores."""
+
 import torch
 from transformers import (
     AutoModelForCausalLM,
@@ -93,12 +95,12 @@ os.environ["WANDB_DISABLED"] = "true"
 
 # Define training arguments
 training_args = TrainingArguments(
-    output_dir="./gpt2-finetuned/pruned-outliers",
+    output_dir="./gpt2-finetuned/tracin-random",
     run_name="project0",
     eval_strategy="no",
     save_strategy="epoch",
-    per_device_train_batch_size=16,
-    gradient_accumulation_steps=2,
+    per_device_train_batch_size=1,
+    gradient_accumulation_steps=1,
     num_train_epochs=1,
     fp16=False,
     local_rank=local_rank,
@@ -121,7 +123,7 @@ trainer = TracinTrainer(
 )
 
 trainer.train()
-torch.save(capture_callback.checkpoint_grads, "tracin_grads_1e5.pt")
+torch.save(capture_callback.checkpoint_grads, "datasets/tracin_grads_1e5.pt")
 
 print(f"Number of checkpoints captured: {len(capture_callback.checkpoint_grads)}")
 
