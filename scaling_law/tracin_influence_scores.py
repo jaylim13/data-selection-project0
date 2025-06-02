@@ -84,8 +84,8 @@ with open(
 ) as f:
     json.dump(influence_scores, f)
 
-with open("influence_scores_list.json", "r") as f:
-    influence_scores = json.load(f)
+# with open("influence_scores_list.json", "r") as f:
+#     influence_scores = json.load(f)
 
 # Now `influence_scores` is a list that you can use
 # print(influence_scores)  # F

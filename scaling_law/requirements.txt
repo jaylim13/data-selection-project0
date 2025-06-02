@@ -1,0 +1,18 @@
+pip>=23.0  # Optional: specify minimum version for pip
+
+# PyTorch and torchvision with CUDA 12.1
+torch --index-url https://download.pytorch.org/whl/cu121
+torchvision --index-url https://download.pytorch.org/whl/cu121
+
+# Common packages
+pandas
+numpy
+pyarrow
+
+# Hugging Face ecosystem
+transformers
+datasets
+accelerate
+
+# Plotting
+matplotlib

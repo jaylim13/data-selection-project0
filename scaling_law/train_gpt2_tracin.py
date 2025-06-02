@@ -60,7 +60,7 @@ print(randomized_dataset)
 """Part 4 Tokenize"""
 
 
-def tokenize_train(dataset, tokenizer, token_max=100_000, heuristic=False):
+def tokenize_train(dataset, tokenizer, token_max=100_000):
     """Tokenizer function for streamed dataset"""
     current_token_count = 0
     for example in dataset:
