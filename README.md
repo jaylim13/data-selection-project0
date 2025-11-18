@@ -1,11 +1,11 @@
-# data-selection-project0
+# Investigation of the Scaling Law During Continual Pretraining of Commerical LLMs
 
-This is the project repo for my undergraduate research with Glow.AI Sem 2 2024-2025 AY. 
+This is the project repository for my undergraduate research with Glow.AI Sem 2 2024-2025 AY. 
 
 Project Description: 
 Continuously pre-train GPT-2 in python on both a randomly selected subset and a perplexity-limited subset from the C4 dataset train split. Since the allenai/c4 Hugging Face repository does not have a test split, we evaluate on the C4 dataset's validation set. 
 
-# 2 Training workflow options:
+# Two Training workflow options:
 
 ### 1. Run lightweight_fine_tuning.ipynb w/ perplexity heuristic (max 1 GPU) 
 * This setup only trains model. We use both C4 train split and C4 validation split for training here (no evaluation step).
