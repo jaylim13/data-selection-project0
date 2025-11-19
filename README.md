@@ -1,9 +1,9 @@
 # Investigation of the Scaling Law During Continual Pretraining of Commerical LLMs
 
-This is the project repository for my undergraduate research with Glow.AI Sem 2 2024-2025 AY. 
+This is the project repository for my undergraduate research with [Glow.AI](https://www.comp.nus.edu.sg/~lowkh/index.html) Sem 2 2024-2025 AY. 
 
 Project Description: 
-Continuously pre-train GPT-2 in python on both a randomly selected subset and a perplexity-limited subset from the C4 dataset train split. Since the allenai/c4 Hugging Face repository does not have a test split, we evaluate on the C4 dataset's validation set. 
+Continually pre-train GPT-2 in Python on a randomly selected subset, perplexity-limited subset, and TracIn-filtered subset from the C4 dataset train split. Since the allenai/c4 Hugging Face repository does not have a test split, we evaluate on the C4 dataset's validation set. 
 
 # Two Training workflow options:
 
